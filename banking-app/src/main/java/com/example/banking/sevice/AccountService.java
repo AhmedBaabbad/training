@@ -1,6 +1,7 @@
 package com.example.banking.sevice;
 
 import com.example.banking.dto.AccountDto;
+import com.example.banking.dto.TransactionHistoryDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
