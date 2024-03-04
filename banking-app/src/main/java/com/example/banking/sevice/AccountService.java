@@ -17,4 +17,6 @@ public interface AccountService {
     void deleteAccount(Long id);
     AccountDto updateAccount(Long id, AccountDto updatedAccountDto);
 
+    AccountDto transfer(Long fromAccountId, Long toAccountId, double amount);
+
 }

@@ -97,6 +97,24 @@ public class AccountServiceImpl implements AccountService {
 
     }
 
+    @Override
+    public AccountDto transfer(Long fromAccountId, Long toAccountId, double amount) {
+        Account fromAccount = accountRespository.findById(fromAccountId)
+                .orElseThrow(() -> new RuntimeException("From Account does not exist"));
+
+        if (fromAccount.getBalance() < amount) {
+            throw new RuntimeException("Insufficient balance");
+        }
+
+        Account toAccount = accountRespository.findById(toAccountId)
+                .orElseThrow(() -> new RuntimeException("To Account does not exist"));
+
+        processTransaction(fromAccount.getId(), amount, Constants.TRANSACTION_WITHDRAWAL);
+        processTransaction(toAccount.getId(), amount, Constants.TRANSACTION_DEPOSIT);
+
+        return getAccountById(fromAccount.getId());
+    }
+
     private AccountDto processTransaction(Long id, double amount, String transactionType) {
         Account account = accountRespository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Account does not exist"));

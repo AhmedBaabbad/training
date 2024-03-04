@@ -107,4 +107,16 @@ public class AccountController {
         AccountDto updatedAccount = accountService.updateAccount(id, updatedAccountDto);
         return ResponseEntity.ok(updatedAccount);
     }
+
+    @PostMapping("/transfer")
+    public  ResponseEntity<String> transfer(
+            @RequestParam("fromAccountId") Long fromAccountId,
+            @RequestParam("toAccountId") Long toAccountId,
+            @RequestParam("amount") double amount) {
+
+        accountService.transfer(fromAccountId, toAccountId, amount);
+        return ResponseEntity.status(HttpStatus.OK).
+                body("The amount "+amount+" has been withdrwan from account "
+                        +fromAccountId+" into account "+toAccountId+" successfully");
+    }
 }
