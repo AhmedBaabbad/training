@@ -24,14 +24,18 @@ public class AccountServiceImpl implements AccountService {
     private final TransactionHistoryRespository transactionHistoryRespository;
 
     public AccountServiceImpl(AccountRespository accountRespository,
-                              TransactionHistoryRespository transactionHistoryRespository)  {
+                              TransactionHistoryRespository transactionHistoryRespository
+                               )  {
         this.accountRespository = accountRespository;
         this.transactionHistoryRespository=transactionHistoryRespository;
     }
 
     @Override
     public AccountDto createAccount(AccountDto accountDto) {
+        // Generate account number
+        String accountNumber= AccountUtil.generateAccountNumber();
         Account account = AccountUtil.mapToAccount(accountDto);
+        account.setAccountNumber(accountNumber);
         Account createdAccount = accountRespository.save(account);
         return AccountUtil.mapToAccountDto(createdAccount);
     }
