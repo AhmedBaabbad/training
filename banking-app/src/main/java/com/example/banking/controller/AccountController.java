@@ -1,6 +1,8 @@
 package com.example.banking.controller;
 
 import com.example.banking.dto.AccountDto;
+import com.example.banking.dto.AccountHolderDetailsDto;
+import com.example.banking.entity.AccountHolderDetails;
 import com.example.banking.sevice.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +24,18 @@ public class AccountController {
     /**
      * Create a new account.
      *
-     * @param accountDto The account details to create.
+     * @param accountHolderDetailsDto The account details to create.
      * @return ResponseEntity<AccountDto> The created account DTO.
      */
-    @PostMapping
-    public ResponseEntity<AccountDto> createAccount(@RequestBody AccountDto accountDto) {
+   /* @PostMapping
+    public ResponseEntity<AccountDto> createAccount(@RequestBody AccountDto accountDto) throws IllegalAccessException, InstantiationException {
         return new ResponseEntity<>(accountService.createAccount(accountDto), HttpStatus.CREATED);
+    }*/
+
+    @PostMapping
+    public ResponseEntity<AccountHolderDetails> createAccount(
+            @RequestBody AccountHolderDetailsDto accountHolderDetailsDto) throws IllegalAccessException, InstantiationException {
+        return new ResponseEntity<>(accountService.createAccount(accountHolderDetailsDto), HttpStatus.CREATED);
     }
 
     /**

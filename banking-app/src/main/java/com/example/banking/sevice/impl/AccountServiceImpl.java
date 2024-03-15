@@ -1,18 +1,19 @@
 package com.example.banking.sevice.impl;
 
-import com.example.banking.dto.AccountDto;
-import com.example.banking.dto.TransactionHistoryDto;
-import com.example.banking.entity.Account;
-import com.example.banking.entity.Constants;
-import com.example.banking.entity.TransactionHistory;
+import com.example.banking.dto.*;
+import com.example.banking.entity.*;
+import com.example.banking.repository.AccountHolderDetailsRepository;
 import com.example.banking.repository.AccountRespository;
 import com.example.banking.repository.TransactionHistoryRespository;
 import com.example.banking.sevice.AccountService;
-import com.example.banking.sevice.TransactionHistoryService;
 import com.example.banking.utility.AccountUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,24 +21,70 @@ import java.util.stream.Collectors;
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRespository accountRespository;
-
+    private final AccountHolderDetailsRepository accountHolderDetailsRepository;
     private final TransactionHistoryRespository transactionHistoryRespository;
 
     public AccountServiceImpl(AccountRespository accountRespository,
+                              AccountHolderDetailsRepository accountHolderDetailsRepository,
                               TransactionHistoryRespository transactionHistoryRespository
-                               )  {
+    ) {
         this.accountRespository = accountRespository;
-        this.transactionHistoryRespository=transactionHistoryRespository;
+        this.transactionHistoryRespository = transactionHistoryRespository;
+        this.accountHolderDetailsRepository = accountHolderDetailsRepository;
     }
 
-    @Override
-    public AccountDto createAccount(AccountDto accountDto) {
+   /* @Override
+    public AccountDto createAccount(AccountDto accountDto) throws IllegalAccessException, InstantiationException {
         // Generate account number
         String accountNumber= AccountUtil.generateAccountNumber();
         Account account = AccountUtil.mapToAccount(accountDto);
         account.setAccountNumber(accountNumber);
         Account createdAccount = accountRespository.save(account);
-        return AccountUtil.mapToAccountDto(createdAccount);
+       // return AccountUtil.mapToAccountDto(createdAccount);
+        return AccountUtil.mapToDto(createdAccount,AccountDto.class);
+    } */
+
+    @Transactional
+    @Override
+    public AccountHolderDetails createAccount(AccountHolderDetailsDto accountHolderDetailsDto) throws IllegalAccessException, InstantiationException {
+        // Generate account number
+        String accountNumber = AccountUtil.generateAccountNumber();
+        // Get current date and time
+        LocalDateTime now = LocalDateTime.now();
+        // Format the date and time
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDateTime = now.format(formatter);
+
+        Address address = new Address();
+        address.setStreetAddress(accountHolderDetailsDto.getAddress().getStreetAddress());
+        address.setCity(accountHolderDetailsDto.getAddress().getCity());
+        address.setState(accountHolderDetailsDto.getAddress().getState());
+        address.setZipCode(accountHolderDetailsDto.getAddress().getZipCode());
+
+        ContactInformation contactInformation = new ContactInformation();
+        contactInformation.setEmail(accountHolderDetailsDto.getContactInformation().getEmail());
+        contactInformation.setPhoneNumber(accountHolderDetailsDto.getContactInformation().getPhoneNumber());
+        contactInformation.setAlternatePhoneNumber(accountHolderDetailsDto.getContactInformation().getAlternatePhoneNumber());
+
+        AccountInformation accountInformation = new AccountInformation();
+        accountInformation.setAccountNumber(accountNumber);
+        accountInformation.setAccountType(AccountUtil.
+                validateAccountType(accountHolderDetailsDto.getAccountInformation().getAccountType()));
+        accountInformation.setAccountStatus(AccountConstants.ACCOUNT_STATUS_ACTIVE);
+        accountInformation.setCreationAccountDate(formattedDateTime);
+        accountInformation.setBalance(accountHolderDetailsDto.getAccountInformation().getBalance());
+
+        // Create AccountHolderDetails entity
+        AccountHolderDetails accountHolderDetails = new AccountHolderDetails();
+
+        accountHolderDetails.setFullName(accountHolderDetailsDto.getFullName());
+        accountHolderDetails.setAddress(address);
+        accountHolderDetails.setContactInformation(contactInformation);
+        accountHolderDetails.setAccountInformation(accountInformation);
+        accountHolderDetails.setDateOfBirth(accountHolderDetailsDto.getDateOfBirth());
+        accountHolderDetails.setIdentificationNumber(accountHolderDetailsDto.getIdentificationNumber());
+        // Save AccountHolderDetails entity
+        return accountHolderDetailsRepository.save(accountHolderDetails);
     }
 
     @Override
@@ -54,7 +101,7 @@ public class AccountServiceImpl implements AccountService {
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException(" Account does not exist"));
 
-        return processTransaction(id, amount, Constants.TRANSACTION_DEPOSIT);
+        return processTransaction(id, amount, AccountConstants.TRANSACTION_DEPOSIT);
     }
 
     @Override
@@ -66,7 +113,7 @@ public class AccountServiceImpl implements AccountService {
         if (account.getBalance() < amount) {
             throw new RuntimeException("Insufficent balance");
         }
-        return processTransaction(id, amount, Constants.TRANSACTION_WITHDRAWAL);
+        return processTransaction(id, amount, AccountConstants.TRANSACTION_WITHDRAWAL);
     }
 
     @Override
@@ -113,8 +160,8 @@ public class AccountServiceImpl implements AccountService {
         Account toAccount = accountRespository.findById(toAccountId)
                 .orElseThrow(() -> new RuntimeException("To Account does not exist"));
 
-        processTransaction(fromAccount.getId(), amount, Constants.TRANSACTION_WITHDRAWAL);
-        processTransaction(toAccount.getId(), amount, Constants.TRANSACTION_DEPOSIT);
+        processTransaction(fromAccount.getId(), amount, AccountConstants.TRANSACTION_WITHDRAWAL);
+        processTransaction(toAccount.getId(), amount, AccountConstants.TRANSACTION_DEPOSIT);
 
         return getAccountById(fromAccount.getId());
     }
@@ -123,22 +170,22 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRespository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Account does not exist"));
         double newBalance;
-        if(Constants.TRANSACTION_DEPOSIT.equals(transactionType)){
+        if (AccountConstants.TRANSACTION_DEPOSIT.equals(transactionType)) {
             newBalance = account.getBalance() + amount;
         } else {
             newBalance = account.getBalance() - amount;
         }
-            account.setBalance(newBalance);
-            Account updatedAccount = accountRespository.save(account);
+        account.setBalance(newBalance);
+        Account updatedAccount = accountRespository.save(account);
 
-            TransactionHistory transactionHistory = new TransactionHistory();
-            transactionHistory.setAccountId(id);
-            transactionHistory.setAmount(amount);
-            transactionHistory.setTimestamp(LocalDateTime.now());
-            transactionHistory.setType(transactionType);
-            transactionHistoryRespository.save(transactionHistory);
+        TransactionHistory transactionHistory = new TransactionHistory();
+        transactionHistory.setAccountId(id);
+        transactionHistory.setAmount(amount);
+        transactionHistory.setTimestamp(LocalDateTime.now());
+        transactionHistory.setType(transactionType);
+        transactionHistoryRespository.save(transactionHistory);
 
-            return AccountUtil.mapToAccountDto(updatedAccount);
+        return AccountUtil.mapToAccountDto(updatedAccount);
 
     }
 

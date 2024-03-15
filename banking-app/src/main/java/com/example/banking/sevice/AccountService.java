@@ -1,7 +1,8 @@
 package com.example.banking.sevice;
 
 import com.example.banking.dto.AccountDto;
-import com.example.banking.dto.TransactionHistoryDto;
+import com.example.banking.dto.AccountHolderDetailsDto;
+import com.example.banking.entity.AccountHolderDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,7 +10,8 @@ import java.util.List;
 @Service
 public interface AccountService {
 
-    AccountDto createAccount (AccountDto accountDto);
+   // AccountDto createAccount (AccountDto accountDto) throws IllegalAccessException, InstantiationException;
+   AccountHolderDetails createAccount (AccountHolderDetailsDto accountHolderDetailsDto) throws IllegalAccessException, InstantiationException;
     AccountDto getAccountById(Long id);
     AccountDto deposit (Long id, double amount);
     AccountDto withdraw (Long id, double amount);
