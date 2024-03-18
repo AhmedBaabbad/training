@@ -7,11 +7,9 @@ import com.example.banking.repository.AccountRespository;
 import com.example.banking.repository.TransactionHistoryRespository;
 import com.example.banking.sevice.AccountService;
 import com.example.banking.utility.AccountUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -44,7 +42,7 @@ public class AccountServiceImpl implements AccountService {
         return AccountUtil.mapToDto(createdAccount,AccountDto.class);
     } */
 
-    @Transactional
+/*    @Transactional
     @Override
     public AccountHolderDetails createAccount(AccountHolderDetailsDto accountHolderDetailsDto) throws IllegalAccessException, InstantiationException {
         // Generate account number
@@ -85,7 +83,58 @@ public class AccountServiceImpl implements AccountService {
         accountHolderDetails.setIdentificationNumber(accountHolderDetailsDto.getIdentificationNumber());
         // Save AccountHolderDetails entity
         return accountHolderDetailsRepository.save(accountHolderDetails);
+    } */
+
+    @Transactional
+    @Override
+    public AccountHolderDetailsDto createAccount(AccountHolderDetailsDto accountHolderDetailsDto) throws IllegalAccessException, InstantiationException {
+        // Generate account number
+        String accountNumber = AccountUtil.generateAccountNumber();
+        // Get current date and time
+        LocalDateTime now = LocalDateTime.now();
+        // Format the date and time
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDateTime = now.format(formatter);
+
+        // Convert DTOs to entities
+        Address address = AccountUtil.mapToEntity(accountHolderDetailsDto.getAddress(), Address.class);
+        ContactInformation contactInformation = AccountUtil.mapToEntity(accountHolderDetailsDto.getContactInformation(), ContactInformation.class);
+        AccountInformation accountInformation = AccountUtil.mapToEntity(accountHolderDetailsDto.getAccountInformation(), AccountInformation.class);
+
+        // Populate additional fields
+        accountInformation.setAccountNumber(accountNumber);
+        accountInformation.setAccountType(AccountUtil.validateAccountType(accountHolderDetailsDto.getAccountInformation().getAccountType()));
+        accountInformation.setAccountStatus(AccountConstants.ACCOUNT_STATUS_ACTIVE);
+        accountInformation.setCreationAccountDate(formattedDateTime);
+
+        // Create AccountHolderDetails entity
+        AccountHolderDetails accountHolderDetails = new AccountHolderDetails();
+
+        accountHolderDetails.setFullName(accountHolderDetailsDto.getFullName());
+        accountHolderDetails.setAddress(address);
+        accountHolderDetails.setContactInformation(contactInformation);
+        accountHolderDetails.setAccountInformation(accountInformation);
+        accountHolderDetails.setDateOfBirth(accountHolderDetailsDto.getDateOfBirth());
+        accountHolderDetails.setIdentificationNumber(accountHolderDetailsDto.getIdentificationNumber());
+
+        // Save AccountHolderDetails entity
+        AccountHolderDetails savedAccountHolderDetails = accountHolderDetailsRepository.save(accountHolderDetails);
+
+        // Convert saved entity to DTO
+        AccountHolderDetailsDto savedAccountHolderDetailsDto = AccountUtil.mapToAccountDto(savedAccountHolderDetails);
+
+        return savedAccountHolderDetailsDto;
     }
+
+    @Override
+    public AccountHolderDetailsDto getAllByAccountNumber(String accountNumber) {
+
+        AccountHolderDetails accountByAccountNumber = accountHolderDetailsRepository
+                .findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException(" Account number does not exist"));
+        return AccountUtil.mapToAccountDto(accountByAccountNumber);
+    }
+
 
     @Override
     public AccountDto getAccountById(Long id) {

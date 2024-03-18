@@ -33,9 +33,26 @@ public class AccountController {
     }*/
 
     @PostMapping
-    public ResponseEntity<AccountHolderDetails> createAccount(
+    public ResponseEntity<AccountHolderDetailsDto> createAccount(
             @RequestBody AccountHolderDetailsDto accountHolderDetailsDto) throws IllegalAccessException, InstantiationException {
         return new ResponseEntity<>(accountService.createAccount(accountHolderDetailsDto), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/api")
+    public ResponseEntity<AccountHolderDetailsDto> getAccountByAccountNumber
+            (@RequestParam("account_Number") String accountNumber) {
+     /*   try {
+            AccountHolderDetailsDto accountDetailsDto = accountService.getAllByAccountNumber(accountNumber);
+            return ResponseEntity.ok(accountDetailsDto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } */
+        AccountHolderDetailsDto accountDetailsDto = accountService.getAllByAccountNumber(accountNumber);
+        if (accountDetailsDto != null) {
+            return ResponseEntity.ok(accountDetailsDto); // Return account details if found
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Return 404 if account number not found
+        }
     }
 
     /**

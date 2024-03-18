@@ -16,7 +16,7 @@ public class AccountUtil {
 
 
 
-  /*  public static AccountHolderDetails mapToAccount(AccountHolderDetailsDTO accountHolderDetailsDTO) {
+    public static AccountHolderDetails mapToAccount(AccountHolderDetailsDto accountHolderDetailsDTO) {
 
         AccountHolderDetails accountHolderDetails = new AccountHolderDetails(
                 accountHolderDetailsDTO.getId(),
@@ -31,14 +31,14 @@ public class AccountUtil {
         return accountHolderDetails;
     }
 
-    private static Address mapToAddress(AddressDTO addressDTO) {
+    private static Address mapToAddress(AddressDto addressDTO) {
         // Map AddressDTO fields to Address fields
         Address address = new Address(
                 addressDTO.getId(),
                 addressDTO.getStreetAddress(),
                 addressDTO.getCity(),
                 addressDTO.getState(),
-                addressDTO.getPostalCode());
+                addressDTO.getZipCode());
 
         return address;
     }
@@ -57,7 +57,7 @@ public class AccountUtil {
         return accountInformation;
     }
 
-    private static ContactInformation mapToContactInformation(ContactInformationDTO contactInformationDTO) {
+    private static ContactInformation mapToContactInformation(ContactInformationDto contactInformationDTO) {
         // Map ContactInformationDTO fields to ContactInformation fields
         ContactInformation contactInformation = new ContactInformation(
                 contactInformationDTO.getId(),
@@ -69,9 +69,9 @@ public class AccountUtil {
         return contactInformation;
     }
 
-    public static AccountHolderDetailsDTO mapToAccountDto(AccountHolderDetails accountHolderDetails) {
+    public static AccountHolderDetailsDto mapToAccountDto(AccountHolderDetails accountHolderDetails) {
 
-        AccountHolderDetailsDTO accountHolderDetailsDTO = new AccountHolderDetailsDTO(
+        AccountHolderDetailsDto accountHolderDetailsDto = new AccountHolderDetailsDto(
                 accountHolderDetails.getId(),
                 accountHolderDetails.getFullName(),
                 mapToAddressDto(accountHolderDetails.getAddress()),
@@ -81,13 +81,13 @@ public class AccountUtil {
                 accountHolderDetails.getIdentificationNumber()
 
         );
-        return accountHolderDetailsDTO;
+        return accountHolderDetailsDto;
     }
 
 
-    private static AddressDTO mapToAddressDto(Address address) {
+    private static AddressDto mapToAddressDto(Address address) {
         // Map AddressDTO fields to Address fields
-        AddressDTO addressDTO = new AddressDTO(
+        AddressDto addressDTO = new AddressDto(
                 address.getId(),
                 address.getStreetAddress(),
                 address.getCity(),
@@ -104,24 +104,24 @@ public class AccountUtil {
                 accountInformation.getId(),
                 accountInformation.getAccountNumber(),
                 accountInformation.getAccountType(),
-                accountInformation.getCreationDate(),
+                accountInformation.getCreationAccountDate(),
                 accountInformation.getAccountStatus(),
                 accountInformation.getBalance());
 
         return accountInformationDto;
     }
 
-    private static ContactInformationDTO mapToContactInformationDto(ContactInformation contactInformation) {
+    private static ContactInformationDto mapToContactInformationDto(ContactInformation contactInformation) {
         // Map ContactInformationDTO fields to ContactInformation fields
-        ContactInformationDTO contactInformationDTO = new ContactInformationDTO(
+        ContactInformationDto contactInformationDto = new ContactInformationDto(
                 contactInformation.getId(),
                 contactInformation.getEmail(),
                 contactInformation.getPhoneNumber(),
                 contactInformation.getAlternatePhoneNumber());
 
         // Map other fields...
-        return contactInformationDTO;
-    } */
+        return contactInformationDto;
+    }
 
     public static <T, U> T mapToDto(U entity, Class<T> dtoClass) throws IllegalAccessException, InstantiationException {
         T dto = dtoClass.newInstance();

@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class AccountHolderDetailsDto {
 
+    private Long id;
     private String fullName;
     private AddressDto address;
     private ContactInformationDto contactInformation;

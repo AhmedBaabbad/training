@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContactInformationDto {
+    private Long id;
     private String email;
     private String phoneNumber;
     private String alternatePhoneNumber;

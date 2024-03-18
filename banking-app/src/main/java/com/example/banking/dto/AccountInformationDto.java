@@ -11,9 +11,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AccountInformationDto {
+    private Long id;
     private String accountNumber;
     private String accountType;
-    private LocalDate creationDate;
+    private String creationDate;
     private String accountStatus;
     private double balance;
 }
